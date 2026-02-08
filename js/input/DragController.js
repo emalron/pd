@@ -97,8 +97,9 @@ export class DragController {
         if (!this.isDragging) return;
 
         const elapsed = this.scene.time.now - this.dragStartTime;
-        const remaining = Math.max(0, CONFIG.DRAG.TIMEOUT_MS - elapsed);
-        const fraction = remaining / CONFIG.DRAG.TIMEOUT_MS;
+        const timeout = this.scene.getDragTimeout?.() ?? CONFIG.DRAG.TIMEOUT_MS;
+        const remaining = Math.max(0, timeout - elapsed);
+        const fraction = remaining / timeout;
 
         if (remaining <= 0) {
             this._endDrag();

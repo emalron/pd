@@ -49,4 +49,13 @@ export const CONFIG = {
         COMBO_PAUSE_MS: 200,
         FALL_MS_PER_CELL: 80,
     },
+
+    ROGUELIKE: {
+        STARTING_HP: 100,
+        STARTING_ATK: 10,
+        STARTING_DEF: 2,
+        STARTING_RCV: 5,
+        COMBO_DAMAGE_SCALE: 0.25,
+        MATCH_SIZE_BONUS: 0.25,
+    },
 };

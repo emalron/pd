@@ -1,4 +1,5 @@
 import { CONFIG } from '../config.js';
+import { PlayerState } from '../roguelike/PlayerState.js';
 
 // ============================================================
 // MenuScene — mode selection screen with scrollable mode list
@@ -109,6 +110,16 @@ export class MenuScene extends Phaser.Scene {
     _getModes() {
         const modes = [
             {
+                title: 'ROGUELIKE',
+                desc: 'Battle monsters across worlds!\nEarn gold, upgrade stats,\nand conquer the dungeons.',
+                bgColor: 0x783434,
+                borderColor: 0x5C1E1E,
+                onClick: () => {
+                    const playerState = new PlayerState();
+                    this.scene.start('BattleScene', { playerState });
+                },
+            },
+            {
                 title: 'DEMO MODE',
                 desc: 'Free play — endless practice.\nNew orbs keep falling after matches.',
                 bgColor: 0x2A6478,
@@ -121,67 +132,6 @@ export class MenuScene extends Phaser.Scene {
                 bgColor: 0x6A3478,
                 borderColor: 0x4E2458,
                 onClick: () => this.scene.start('GameScene', { mode: 'clear' }),
-            },
-            // --- Dummy modes for scroll testing ---
-            {
-                title: 'TIME ATTACK',
-                desc: 'Race against the clock!\nClear as many combos as possible.',
-                bgColor: 0x784A2A, borderColor: 0x5C3A1E,
-                onClick: () => console.log('TIME ATTACK (dummy)'),
-            },
-            {
-                title: 'SURVIVAL',
-                desc: 'Survive as long as you can.\nDifficulty increases over time.',
-                bgColor: 0x2A7834, borderColor: 0x1E5C28,
-                onClick: () => console.log('SURVIVAL (dummy)'),
-            },
-            {
-                title: 'SCORE RUSH',
-                desc: 'Maximize your score in limited moves.\nEvery combo counts!',
-                bgColor: 0x78782A, borderColor: 0x5C5C1E,
-                onClick: () => console.log('SCORE RUSH (dummy)'),
-            },
-            {
-                title: 'ZEN MODE',
-                desc: 'No pressure, no timer.\nJust relax and match orbs.',
-                bgColor: 0x2A3478, borderColor: 0x1E285C,
-                onClick: () => console.log('ZEN MODE (dummy)'),
-            },
-            {
-                title: 'CHALLENGE',
-                desc: 'Complete specific objectives.\nTest your puzzle skills!',
-                bgColor: 0x782A5C, borderColor: 0x5C1E44,
-                onClick: () => console.log('CHALLENGE (dummy)'),
-            },
-            {
-                title: 'DAILY DUNGEON',
-                desc: 'New dungeon every day!\nExclusive rewards await.',
-                bgColor: 0x347878, borderColor: 0x1E5C5C,
-                onClick: () => console.log('DAILY DUNGEON (dummy)'),
-            },
-            {
-                title: 'BOSS FIGHT',
-                desc: 'Battle powerful bosses.\nStrategic combos deal damage.',
-                bgColor: 0x783434, borderColor: 0x5C1E1E,
-                onClick: () => console.log('BOSS FIGHT (dummy)'),
-            },
-            {
-                title: 'MULTIPLAYER',
-                desc: 'Compete against other players.\nClimb the leaderboard!',
-                bgColor: 0x4A2A78, borderColor: 0x381E5C,
-                onClick: () => console.log('MULTIPLAYER (dummy)'),
-            },
-            {
-                title: 'TRAINING',
-                desc: 'Learn advanced techniques.\nGuided combo tutorials.',
-                bgColor: 0x2A7858, borderColor: 0x1E5C40,
-                onClick: () => console.log('TRAINING (dummy)'),
-            },
-            {
-                title: 'ENDLESS',
-                desc: 'Never-ending puzzle madness.\nHow far can you go?',
-                bgColor: 0x78582A, borderColor: 0x5C401E,
-                onClick: () => console.log('ENDLESS (dummy)'),
             },
         ];
 
@@ -221,6 +171,8 @@ export class MenuScene extends Phaser.Scene {
 
         this.input.on('pointerup', () => {
             this._isDragging = false;
+            // Reset on next frame so card pointerup handlers still see the flag
+            this.time.delayedCall(0, () => { this._dragMoved = false; });
         });
 
         this.input.on('wheel', (_pointer, _gameObjects, _deltaX, deltaY) => {
