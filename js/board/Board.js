@@ -246,14 +246,15 @@ export class Board {
      * @param {number} comboStart  running combo count (for cascades)
      * @returns {Promise<number>} final combo count after this wave
      */
-    async resolveMatches(groups, comboStart = 0) {
+    async resolveMatches(groups, comboStart = 0, onGroupResolved = null) {
         let combo = comboStart;
 
         for (const group of groups) {
             combo++;
 
-            // Floating combo number
+            // Floating combo number + particle burst
             this._showComboPopup(combo, group);
+            this._playMatchBurst(group);
 
             // Animate all cells in this group simultaneously
             const anims = group.cells.map(({ row, col }) =>
@@ -268,6 +269,9 @@ export class Board {
                     this.grid[row][col] = null;
                 }
             }
+
+            // Per-group callback (used by BattleScene for inline combat)
+            if (onGroupResolved) await onGroupResolved(group, combo);
 
             // Brief pause before the next combo
             await this._delay(CONFIG.ANIM.COMBO_PAUSE_MS);
@@ -317,6 +321,39 @@ export class Board {
                 });
             },
         });
+    }
+
+    /** @private Fire-and-forget particle burst at the centre of a matched group. */
+    _playMatchBurst(group) {
+        let cx = 0, cy = 0;
+        for (const { row, col } of group.cells) {
+            const p = this.getCellCenter(row, col);
+            cx += p.x;
+            cy += p.y;
+        }
+        cx /= group.cells.length;
+        cy /= group.cells.length;
+
+        const sym = CONFIG.SYMBOLS[group.type];
+        const color = sym ? sym.color : 0xffffff;
+        const count = 6;
+
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 / count) * i;
+            const particle = this.scene.add.circle(cx, cy, 5, color).setDepth(1500).setAlpha(0.9);
+
+            this.scene.tweens.add({
+                targets: particle,
+                x: cx + Math.cos(angle) * 60,
+                y: cy + Math.sin(angle) * 60,
+                alpha: 0,
+                scaleX: 0.3,
+                scaleY: 0.3,
+                duration: 300,
+                ease: 'Power2',
+                onComplete: () => particle.destroy(),
+            });
+        }
     }
 
     // ==========================================================
